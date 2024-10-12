@@ -39,7 +39,7 @@ AtCoderEnv/
 └── contests/
     └── <contest_title>/             # e.g., abc/
         └── <contest_number>/        # e.g., 199/
-            └── <question_alphabet>/ # e.g., a/
+            └── <question_alphabet>/ # e.g., abc199_a/
                 ├── main.cpp         # template file
                 ├── main_test.cpp    # template file
                 └── sample/          # directory for test cases
@@ -48,6 +48,7 @@ AtCoderEnv/
                     ├── ...          # more test cases
                     ├── n.in         # input file for test case n
                     └── n.out        # output file for test case n
+            └──...                   # more questions
 ```
 
 ## Requirements
