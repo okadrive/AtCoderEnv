@@ -6,11 +6,6 @@ Script to create AtCoder environment for C++
 - Validate sample tests on test code
 
 ## How to use
-- create `<contest title>` directory and download testcases
-    - create `<question_alphabet>` directory
-        - `main.cpp`      # copied by sample dir
-        - `main_test.cpp` # same as above
-        - `sample/`       # downloaded testcases
 ```
 python setup.py <contest title> <contest number>
 ```
@@ -34,3 +29,26 @@ python setup.py abc 199
 g++ main.cpp
 a.out
 ```
+
+## Directory structure
+'''
+AtCoderEnv/
+├── setup.py
+├── config.ini
+└── template/
+└── contests/
+    └── <contest_title>/             # e.g., abc/
+        └── <contest_number>/        # e.g., 199/
+            └── <question_alphabet>/ # e.g., a/
+                ├── main.cpp         # template file
+                ├── main_test.cpp    # template file
+                └── sample/          # directory for test cases
+                    ├── 1.in         # input file for test case 1
+                    ├── 1.out        # output file for test case 1
+                    ├── ...          # more test cases
+                    ├── n.in         # input file for test case n
+                    └── n.out        # output file for test case n
+'''
+
+## Requirements
+- Python 3.10 or later
