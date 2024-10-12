@@ -6,6 +6,22 @@ Script to create AtCoder environment for C++
 - Validate sample tests on test code
 
 ## How to use
+### setup
+- create virtual environment and install requirements
+```
+python venv -m venv venv
+pip install -r requirements.txt
+source venv/bin/activate
+```
+
+- create config.ini
+```
+[User]
+username = <username>
+password = <password>
+```
+
+- run setup.py with contest title and contest number
 ```
 python setup.py <contest title> <contest number>
 ```
