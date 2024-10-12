@@ -143,7 +143,7 @@ def download_sample_testcases(local_contest_base_dir, list_task_url):
             if soup.find("h3", string="入力例 {}".format(i)):
                 tc = soup.find("h3", string="入力例 {}".format(i)).next_sibling.text
                 tc.replace("\r", "")
-                with open("{0}/input{1}.txt".format(sample_dir, i), "w") as f:
+                with open("{0}/{1}_input.txt".format(sample_dir, i), "w") as f:
                     f.write(tc)
             else:
                 break
@@ -155,7 +155,7 @@ def download_sample_testcases(local_contest_base_dir, list_task_url):
             if soup.find("h3", string="出力例 {}".format(i)):
                 tc = soup.find("h3", string="出力例 {}".format(i)).next_sibling.text
                 tc.replace("\r", "")
-                with open("{0}/output{1}.txt".format(sample_dir, i), "w") as f:
+                with open("{0}/{1}_output.txt".format(sample_dir, i), "w") as f:
                     f.write(tc)
             else:
                 break
