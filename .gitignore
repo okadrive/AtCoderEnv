@@ -1,24 +1,4 @@
 .DS_Store
 .idea
-cmake-build-*/
 config.ini
-
-# regularly contest
-abc
-agc
-arc
-atc
-dp
-cf
-past
-
-# company
-aising
-panasonic
-hitachi
-keyence
-nomura
-tokiomarine
-hhkb
-m-solutions
-zone
+contests/*
