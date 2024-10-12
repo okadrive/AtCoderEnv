@@ -31,7 +31,7 @@ a.out
 ```
 
 ## Directory structure
-'''
+```
 AtCoderEnv/
 ├── setup.py
 ├── config.ini
@@ -48,7 +48,7 @@ AtCoderEnv/
                     ├── ...          # more test cases
                     ├── n.in         # input file for test case n
                     └── n.out        # output file for test case n
-'''
+```
 
 ## Requirements
 - Python 3.10 or later
