@@ -69,3 +69,6 @@ AtCoderEnv/
 
 ## Requirements
 - Python 3.10 or later
+
+## License
+MIT
