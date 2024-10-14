@@ -59,11 +59,11 @@ AtCoderEnv/
                 ├── main.cpp         # template file
                 ├── main_test.cpp    # template file
                 └── sample/          # directory for test cases
-                    ├── 1.in         # input file for test case 1
-                    ├── 1.out        # output file for test case 1
+                    ├── 1_input.txt  # input file for test case 1
+                    ├── 1_output.txt # output file for test case 1
                     ├── ...          # more test cases
-                    ├── n.in         # input file for test case n
-                    └── n.out        # output file for test case n
+                    ├── n_input.txt  # input file for test case n
+                    └── n_output.txt # output file for test case n
             └──...                   # more questions
 ```
 
