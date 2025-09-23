@@ -47,6 +47,10 @@ int sample_num(string path) {
 
   path += "/sample";
   DIR *d = opendir(path.c_str());
+  if (d == NULL) {
+    cerr << "Error: Could not open directory: " << path << endl;
+    return 0;
+  }
   while ((de = readdir(d))) {
     string file = de->d_name;
     if (file.find("input") != string::npos) {
@@ -62,8 +66,7 @@ int main() {
 
   int tn;
 
-  string path = __FILE__;
-  path = path.substr(0, path.find_last_of('/'));
+  string path = ".";
 
   tn = sample_num(path);
 
