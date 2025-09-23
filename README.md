@@ -29,21 +29,21 @@ python setup.py <contest title> <contest number>
 ### compile
 ```sh
 g++ main.cpp
-a.out
+./a.out
 ```
 
 ### run test
 - output result and running time
 ```sh
 g++ main_test.cpp
-a.out
+./a.out
 ```
 
 ## Example
 ```sh
 python setup.py abc 199
 g++ main.cpp
-a.out
+./a.out
 ```
 
 ## Directory structure
