@@ -17,6 +17,8 @@ import os
 import re
 import sys
 import time
+import subprocess
+import json
 from bs4 import BeautifulSoup
 
 # AtCoder domain
@@ -41,38 +43,113 @@ def http_get_with_retry(url, retries=3, delay=2):
     return None
 
 def login():
-    # URL for login
-    login_url = "{0}/{1}".format(domain, "login")
+    # Check if we have saved cookies first
+    cookie_file = "atcoder_cookies.json"
+    
+    if os.path.exists(cookie_file):
+        print("Found existing cookies, attempting to use them...")
+        if try_login_with_cookies():
+            return session
+        else:
+            print("Saved cookies are invalid, removing them...")
+            os.remove(cookie_file)
+    
+    print("Manual login required due to CloudFlare protection.")
+    print("Opening Chrome browser for manual login...")
+    
+    # Open Chrome with AtCoder login page
+    login_url = "https://atcoder.jp/login"
+    try:
+        # Use macOS 'open' command to launch Chrome
+        subprocess.run(["open", "-a", "Google Chrome", login_url], check=True)
+        print("Chrome opened with AtCoder login page.")
+        print("\nPlease complete the following steps:")
+        print("1. Login to AtCoder in the opened Chrome window")
+        print("2. Complete CloudFlare challenges")
+        print("3. Open Chrome DevTools (F12 or Cmd+Option+I)")
+        print("4. Go to Application tab -> Storage -> Cookies -> https://atcoder.jp")
+        print("5. Find and copy the 'REVEL_SESSION' cookie value")
+        print("\nPress Enter when you have completed login and are ready to continue...")
+        input()
+        
+        # Try to extract cookies from Chrome (simplified approach)
+        return extract_cookies_and_login()
+        
+    except subprocess.CalledProcessError:
+        print("Failed to open Chrome. Please open Chrome manually and navigate to:")
+        print(login_url)
+        input("Press Enter after you have logged in...")
+        return extract_cookies_and_login()
+    except Exception as e:
+        print(f"Error opening browser: {e}")
+        return None
 
-    # Create a session object
-    session = requests.Session()
+def try_login_with_cookies():
+    """Try to login using saved cookies"""
+    try:
+        with open("atcoder_cookies.json", "r") as f:
+            cookies = json.load(f)
+        
+        # Set cookies in session
+        for cookie in cookies:
+            session.cookies.set(cookie['name'], cookie['value'], domain=cookie.get('domain', '.atcoder.jp'))
+        
+        # Test if login is successful by accessing a protected page
+        response = session.get("https://atcoder.jp/settings")
+        if response.status_code == 200 and "Sign Out" in response.text:
+            print("Successfully logged in using saved cookies!")
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Error using saved cookies: {e}")
+        return False
 
-    # First, get the login page to retrieve any necessary hidden form fields (e.g., CSRF tokens)
-    response = session.get(login_url)
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    # Extract CSRF token (if needed by AtCoder's login form)
-    csrf_token = soup.find("input", {"name": "csrf_token"}).get("value")
-
-    # Read AtCoder's username and password from config.ini
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    username = config["user"]["username"]
-    password = config["user"]["password"]
-
-    # Login payload
-    payload = {"username": username, "password": password, "csrf_token": csrf_token}
-
-    # Send POST request to login
-    login_response = session.post(login_url, data=payload)
-
-    # Check if login was successful
-    if login_response.status_code == 200 and "Sign Out" in login_response.text:
-        print("Successfully logged in!")
+def extract_cookies_and_login():
+    """Extract cookies manually and save them"""
+    print("\nCookie extraction method:")
+    print("Please provide the essential cookie from your browser:")
+    print("From Chrome DevTools -> Application -> Cookies -> https://atcoder.jp")
+    
+    cookie_data = []
+    
+    # Only ask for REVEL_SESSION which actually exists
+    while True:
+        value = input("Enter value for cookie 'REVEL_SESSION' (required for login): ").strip()
+        if value:
+            cookie_data.append({
+                'name': 'REVEL_SESSION',
+                'value': value,
+                'domain': '.atcoder.jp'
+            })
+            break
+        print("REVEL_SESSION cookie is required. Please enter a valid value.")
+    
+    # Optional language cookie
+    lang_value = input("Enter value for cookie 'language' (optional, press Enter to skip): ").strip()
+    if lang_value:
+        cookie_data.append({
+            'name': 'language',
+            'value': lang_value,
+            'domain': '.atcoder.jp'
+        })
+    
+    # Save cookies
+    with open("atcoder_cookies.json", "w") as f:
+        json.dump(cookie_data, f, indent=2)
+    
+    # Set cookies in session
+    for cookie in cookie_data:
+        session.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
+    
+    # Test the session
+    response = session.get("https://atcoder.jp/settings")
+    if response.status_code == 200 and ("Sign Out" in response.text or "ログアウト" in response.text):
+        print("Successfully authenticated with provided cookies!")
         return session
     else:
-        print("Login failed.")
-        return None
+        print("Cookie authentication failed, but continuing with current session...")
+        return session
 
 
 def get_list_task_url(contest_name, contest_number):
@@ -140,11 +217,16 @@ def download_sample_testcases(local_contest_base_dir, list_task_url):
         # h3 "入力例 n" are the sample input test cases
         i = 1
         while True:
-            if soup.find("h3", string="入力例 {}".format(i)):
-                tc = soup.find("h3", string="入力例 {}".format(i)).next_sibling.text
-                tc.replace("\r", "")
-                with open("{0}/{1}_input.txt".format(sample_dir, i), "w") as f:
-                    f.write(tc)
+            input_header = soup.find("h3", string="入力例 {}".format(i))
+            if input_header:
+                # Find the next pre element
+                pre_element = input_header.find_next("pre")
+                if pre_element:
+                    tc = pre_element.get_text()
+                    with open("{0}/{1}_input.txt".format(sample_dir, i), "w") as f:
+                        f.write(tc)
+                else:
+                    break
             else:
                 break
             i = i + 1
@@ -152,11 +234,16 @@ def download_sample_testcases(local_contest_base_dir, list_task_url):
         # h3 "出力例 n" are the sample output test cases
         i = 1
         while True:
-            if soup.find("h3", string="出力例 {}".format(i)):
-                tc = soup.find("h3", string="出力例 {}".format(i)).next_sibling.text
-                tc.replace("\r", "")
-                with open("{0}/{1}_output.txt".format(sample_dir, i), "w") as f:
-                    f.write(tc)
+            output_header = soup.find("h3", string="出力例 {}".format(i))
+            if output_header:
+                # Find the next pre element
+                pre_element = output_header.find_next("pre")
+                if pre_element:
+                    tc = pre_element.get_text()
+                    with open("{0}/{1}_output.txt".format(sample_dir, i), "w") as f:
+                        f.write(tc)
+                else:
+                    break
             else:
                 break
             i = i + 1
