@@ -2,3 +2,7 @@
 config.ini
 atcoder_cookies.json
 contests/*
+
+# Local VS Code C++ configuration
+/.vscode/c_cpp_properties.json
+/.vscode/tasks.json
